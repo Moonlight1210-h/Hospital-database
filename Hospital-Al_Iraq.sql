@@ -1,3 +1,5 @@
+ -- hospital database --
+ 
  -- Patients--
  create table patients (
  id int primary key auto_increment,
@@ -9,6 +11,7 @@
  city varchar(50) not null,
  phone varchar(20) unique default null,
  email varchar(50) unique default null);
+ 
  -- doctors --
  create table doctors(
  id int primary key auto_increment,
@@ -18,7 +21,8 @@
   department_id int not null,
   phone varchar(20) unique not null,
   date_of_birth date not null);
-  -- medicine --
+ 
+ -- medicine --
   create table medicine(
   id int primary key auto_increment,
   name varchar(50) not null,
@@ -87,6 +91,15 @@ create table appointment(
     foreign key (patient_id) references Patients(id),
     foreign key (doctor_id) references doctors(id)
 );
+-- nurses --
+ create table nurses(
+ id int primary key auto_increment,
+ first_name varchar(50) not null,
+ last_name varchar(50) not null,
+ department_id int not null,
+ phone varchar(20) unique not null,
+ foreign key (department_id) references departments(id)
+ );
 -- rooms --
 create table rooms(
 id int primary key auto_increment,
@@ -122,15 +135,60 @@ create table payment_methods(
 -- payments --
 create table payments(
 id int primary key auto_increment ,
-bill_id int,
+bill_id int not null,
 amount decimal (10,2) not null,
 payment_date date not null,
-payment_method_id int,
+payment_method_id int not null,
 transaction_id varchar(100),
 foreign key (bill_id) references bills(id),
 foreign key (payment_method_id) references payment_methods(id)
 );
+-- medical_records--
+create table medical_records(
+id int primary key auto_increment,
+patient_id int not null,
+doctor_id int not null,
+visit_date date not null,
+diagnosis text,
+notes text,
+created_at timestamp default current_timestamp,
+foreign key (patient_id) references patients(id),
+foreign key (doctor_id) references doctors(id)
+);
 
+-- lab_tests
+create table lab_tests(
+id int primary key auto_increment,
+patient_id int not null,
+doctor_id int not null,
+test_name varchar(100) not null,
+result text,
+test_date date not null,
+status enum('pending','completed','cancelled' ) default 'pending',
+foreign key (patient_id) references patients(id),
+foreign key (doctor_id) references doctors(id)
+);
+-- staff --
+create table staff(
+id int primary key auto_increment,
+first_name varchar(50) not null,
+last_name varchar (50) not null,
+department_id int,
+role enum ('nurse','admin','lab','worker') not null,
+salary decimal(10,2),
+hire_date date not null,
+foreign key (department_id) references departments(id)
+);
+
+-- check constraints --
+alter table rooms
+add constraint chk_capacity check (capacity > 0);
+alter table bills
+add constraint chk_amount check (amount > 0);
+alter table room_occupancy
+add constraint chk_dates check (to_date > from_date);
+alter table medicine
+add constraint chk_price check (price > 0)
 
 
 
